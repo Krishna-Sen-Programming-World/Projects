@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hand Tracking</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            color: #333;
+        }
+
+        h1 {
+            margin-bottom: 20px;
+            font-size: 2.5em;
+            text-align: center;
+            color: #4A90E2;
+        }
+
+        #camera-feed {
+            width: 80%;
+            max-width: 600px;
+            border: 5px solid #4A90E2;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+            margin-bottom: 20px;
+        }
+
+        #error-message {
+            display: none;
+            color: red;
+            font-weight: bold;
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        #reload-button {
+            padding: 10px 20px;
+            font-size: 1em;
+            color: white;
+            background-color: #4A90E2;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        #reload-button:hover {
+            background-color: #357ABD;
+        }
+
+        @media (max-width: 600px) {
+            h1 {
+                font-size: 2em;
+            }
+
+            #camera-feed {
+                width: 95%;
+            }
+        }
+    </style>
+    <script>
+        function checkCameraStatus() {
+            fetch('/check_camera_status')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.camera_closed) {
+                        window.location.href = '/thank-you';
+                    } else {
+                        setTimeout(checkCameraStatus, 5000); // Check again in 5 seconds
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+        }
+
+        window.onload = function() {
+            checkCameraStatus();
+        };
+
+        function cameraClosed() {
+            document.getElementById('error-message').style.display = 'block';
+        }
+
+        function reloadPage() {
+            window.location.reload(); // Reloads the current page
+        }
+    </script>
+</head>
+<body>
+    <h1>Live Camera Feed with Hand Tracking</h1>
+    <img id="camera-feed" src="{{ url_for('video_feed') }}" alt="Live Camera Feed" onerror="cameraClosed()">
+    <p id="error-message">Camera is now closed.</p>
+    <button id="reload-button" onclick="reloadPage()">Reload Page</button>
+</body>
+</html>
